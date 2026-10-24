@@ -1,57 +1,85 @@
-<h1 align="center">Cloud and Fog removal System using Generative Adversarial Networks - Satellite Image Processing</h1>
+# Satellite Cloud and Fog Removal with GANs
 
-<p align="center">
-<img src="https://user-images.githubusercontent.com/54114888/126111452-2023cf52-d7bb-4eab-aab4-42f4d583e3f5.png" width="" height="">
-</p>
+A Python project for restoring satellite images affected by clouds or fog. It uses a pretrained SPANet generator and provides a local web interface for trying the included models with a sample image or an image of your own.
 
-## 📜 Description:
-Developed an AI System based on Generative Adversarial Networks (GANs) to predict and remove the Clouds and Fog from an Image captured from Satellite. Gets input of a Satellite Image with Clouds and outputs a predicted landscape without clouds. Demo prototype for my internship at Indian Space Research Organization (ISRO)'s Hyderabad campus National Remote Sensing Centre (NRSC). Actual project has been configured and tested through Bhuvan.
+## What the project does
 
-# Sample Demo:
-## Demo 1:
-<div align="center"><img src="./readme_images/test_0000.png" width="600" height=""></div>
+- Restores an input satellite image using one of the included pretrained models.
+- Displays the input, restored image, and model attention map in a browser.
+- Lets you upload an image or use the bundled sample.
+- Lets you download the restored image.
+- Can run inference on a CPU; a CUDA-enabled GPU is optional.
 
-## Demo 2:
-<div align="center"><img src="./readme_images/test_0026.png" width="600" height="""></div>
+The generator is SPANet, an attention-based image restoration network. The training code also includes a conditional discriminator: it judges cloudy/clean image pairs, while the generator learns to produce realistic restorations. Generator training combines adversarial, L1 reconstruction, and attention losses.
 
-## Fog Removal Demo:
-<div align="center"><img src="./readme_images/rice1_result.png" width="600" height=""></div>
+## Requirements
 
-## 👦 Developed By:
-<h2 align="center">Akash Ramjyothi</h2>
-<p align="center">
-  <a href="https://github.com/Akash-Ramjyothi"><img src="https://avatars.githubusercontent.com/u/54114888?v=4" width=150px height=150px /></a> 
-    
-<p align="center">
-  <a target="_blank"href="https://www.linkedin.com/in/akash-ramjyothi/"><img src="https://img.shields.io/badge/linkedin-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="mailto:akash.ramjyothi@gmail.com?subject=Hello%20Akash,%20From%20Github"><img src="https://img.shields.io/badge/gmail-%23D14836.svg?&style=for-the-badge&logo=gmail&logoColor=white" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.instagram.com/akash.ramjyothi/"><img src="https://img.shields.io/badge/instagram-%23D14836.svg?&style=for-the-badge&logo=instagram&logoColor=pink" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  ☎️ PH:+91 8939928002.
-</p>
+- Python 3.9 or newer
+- The pretrained model files included in `pretrained_models/`
+- A CUDA-capable PyTorch installation only if you want GPU inference
 
-## 📃 ISRO Internship Certificate:
-<p align="center">
-<img src="https://user-images.githubusercontent.com/54114888/143440898-9461edd7-cd26-4d3e-9258-9b27d8ca44d0.png" width="650" height="">
-</p>
-  
-## 📜 Research Paper published:
-https://hal.archives-ouvertes.fr/hal-03462652  
+## Run the web interface
 
-## 📜 Internship Final Report link:
-https://drive.google.com/file/d/1huYYi0UTJC2ODtjjyxIQqs8vwjzXRDTL/view?usp=sharing
+Open a terminal in the project folder and install the dependencies:
 
-## 💥 How to Contribute?
+```powershell
+python -m pip install -r requirements.txt
+```
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-[![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/) 
+Start the app:
 
-- Take a look at the Existing [Issues](https://github.com/Akash-Ramjyothi/Cloud-Removal-with-GAN-Satellite-Image-Processing/issues) or create your own Issues!
-- Wait for the Issue to be assigned to you after which you can start working on it.
-- Fork the Repo and create a Branch for any Issue that you are working upon.
-- Create a Pull Request which will be promptly reviewed and suggestions would be added to improve it.
-- Add Screenshots to help me know what this Code is all about.
+```powershell
+python -m streamlit run app.py
+```
 
-## 🌐 References Used:
-- https://arxiv.org/abs/2012.12180
-- https://ieeexplore.ieee.org/document/8519033
-- https://openaccess.thecvf.com/content_WACV_2020/papers/Sarukkai_Cloud_Removal_from_Satellite_Images_using_Spatiotemporal_Generator_Networks_WACV_2020_paper.pdf
+Open the local URL printed by Streamlit (usually `http://localhost:8501`). Select a model, choose **Use the included sample** or upload a PNG, JPG, or TIFF image, and click **Remove clouds / fog**. Use **Download restored image** to save the restored result.
+
+### Models
+
+- **RICE2 (cloud removal)** — `pretrained_models/RICE2/gen_model_epoch_200.pth`
+- **RICE1 (fog removal)** — `pretrained_models/RICE1/gen_model_epoch_200.pth`
+
+The app uses the CPU by default. Select **Use CUDA GPU** in the sidebar if a compatible GPU and CUDA-enabled PyTorch are available.
+
+## Run inference from the command line
+
+The standalone demo saves a comparison image with the input, restoration, and attention map side by side:
+
+```powershell
+python demo.py --test_filepath "readme_images\test_0000.png" --pretrained "pretrained_models\RICE2\gen_model_epoch_200.pth" --output "results\demo.png"
+```
+
+Replace the sample path with the path to your own image. Use the RICE1 checkpoint for fog removal:
+
+```powershell
+python demo.py --test_filepath "path\to\satellite.png" --pretrained "pretrained_models\RICE1\gen_model_epoch_200.pth" --output "results\demo.png"
+```
+
+Inference runs on the CPU unless `--cuda` is supplied and CUDA is available.
+
+## Repository layout
+
+```text
+app.py                 Streamlit web interface
+demo.py                Single-image command-line inference
+train.py               GAN training loop
+eval.py                Model evaluation
+data_manager.py        Dataset loading
+models/gen/SPANet.py   Attention-based generator
+models/dis/dis.py      Conditional discriminator
+pretrained_models/     Included RICE1 and RICE2 generator weights
+readme_images/         Bundled demo images
+data/RICE_DATASET/     Dataset directory structure
+```
+
+## Training data
+
+The dataset directories in this repository contain placeholder files, not the satellite image dataset. Therefore, pretrained inference works without additional data, but training and dataset-based evaluation require the actual RICE dataset. Configure the dataset paths and training parameters in `config.yml` after placing the dataset in the expected structure.
+
+## Notes
+
+This project demonstrates image restoration with pretrained weights. Restored images are model predictions and should not be treated as verified or authoritative satellite observations.
+
+## Credits
+
+The SPANet architecture, GAN training code, and pretrained RICE model weights are based on the original project: [Cloud and Fog Removal with GANs](https://github.com/rahulrajpv/Cloud-and-Fog-removal-System-using-Generative-Adversarial-Networks-Satellite-Image-Processing). This repository adds a Streamlit interface and setup documentation around that work. Please retain this attribution when redistributing the project.
